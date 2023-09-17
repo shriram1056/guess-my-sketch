@@ -4,23 +4,23 @@ import { useState } from 'react'
 import './WelcomePage.css'
 
 export function WelcomePage() {
-  const [showCreateRoomModal, setShowCreateRoomModal] = useState(false)
-  const [formData, setFormData] = useState({}) // State for form data
+  const [showNewRoomModal, setShowNewRoomModal] = useState(false)
+  const [newRoomFormData, setNewRoomFormData] = useState({}) // State for form data
 
   const handleNewRoom = () => {
-    setShowCreateRoomModal(true) // Show the modal when "Create Room" is clicked
+    setShowNewRoomModal(true) // Show the modal when "New Room" is clicked
   }
   const handleJoinRoom = () => {
-    setShowCreateRoomModal(true) // Show the modal when "Create Room" is clicked
+    setShowNewRoomModal(true) // Show the modal when "New Room" is clicked
   }
 
-  const handleCreateRoomCloseModal = () => {
-    setShowCreateRoomModal(false) // Close the modal
+  const handleNewRoomCloseModal = () => {
+    setShowNewRoomModal(false) // Close the modal
   }
 
-  const handleCreateRoomSubmit = () => {
-    console.log(formData)
-    handleCreateRoomCloseModal()
+  const handleNewRoomSubmit = () => {
+    console.log(newRoomFormData)
+    handleNewRoomCloseModal()
   }
 
   return (
@@ -29,7 +29,7 @@ export function WelcomePage() {
       <div className="row">
         <div className="col-auto">
           <button className="btn btn-primary fw-bold" onClick={handleNewRoom}>
-            Create Room
+            New Room
           </button>
         </div>
         <div className="col-auto">
@@ -42,12 +42,12 @@ export function WelcomePage() {
         </div>
       </div>
       <Modal
-        show={showCreateRoomModal}
-        onHide={handleCreateRoomCloseModal}
+        show={showNewRoomModal}
+        onHide={handleNewRoomCloseModal}
         backdrop="static"
       >
         <Modal.Header closeButton>
-          <Modal.Title>Create a Room</Modal.Title>
+          <Modal.Title>New a Room</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -57,14 +57,17 @@ export function WelcomePage() {
                 type="text"
                 placeholder="Enter user name"
                 onChange={(e) =>
-                  setFormData({ ...formData, userName: e.target.value })
+                  setNewRoomFormData({
+                    ...newRoomFormData,
+                    userName: e.target.value,
+                  })
                 }
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleCreateRoomSubmit}>
+          <Button variant="primary" onClick={handleNewRoomSubmit}>
             Submit
           </Button>
         </Modal.Footer>
