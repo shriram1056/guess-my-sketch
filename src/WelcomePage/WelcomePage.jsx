@@ -1,26 +1,41 @@
 import { Button, Modal, Form } from 'react-bootstrap'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import './WelcomePage.css'
 
 export function WelcomePage() {
+  const navigate = useNavigate()
   const [showNewRoomModal, setShowNewRoomModal] = useState(false)
   const [newRoomFormData, setNewRoomFormData] = useState({}) // State for form data
+
+  const [showJoinRoomModal, setShowJoinRoomModal] = useState(false)
+  const [joinRoomFormData, setJoinRoomFormData] = useState({}) // State for form data
 
   const handleNewRoom = () => {
     setShowNewRoomModal(true) // Show the modal when "New Room" is clicked
   }
   const handleJoinRoom = () => {
-    setShowNewRoomModal(true) // Show the modal when "New Room" is clicked
+    setShowJoinRoomModal(true) // Show the modal when "New Room" is clicked
   }
 
   const handleNewRoomCloseModal = () => {
     setShowNewRoomModal(false) // Close the modal
   }
 
+  const handleJoinRoomCloseModal = () => {
+    setShowJoinRoomModal(false) // Close the modal
+  }
+
   const handleNewRoomSubmit = () => {
     console.log(newRoomFormData)
     handleNewRoomCloseModal()
+  }
+
+  const handleJoinRoomSubmit = () => {
+    console.log(joinRoomFormData)
+    navigate('/room')
+    handleJoinRoomCloseModal()
   }
 
   return (
@@ -56,6 +71,7 @@ export function WelcomePage() {
               <Form.Control
                 type="text"
                 placeholder="Enter user name"
+                required
                 onChange={(e) =>
                   setNewRoomFormData({
                     ...newRoomFormData,
@@ -68,6 +84,53 @@ export function WelcomePage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleNewRoomSubmit}>
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showJoinRoomModal}
+        onHide={handleJoinRoomCloseModal}
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>New a Room</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="userName" className="mb-4">
+              <Form.Label>User Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter user name"
+                required
+                onChange={(e) =>
+                  setJoinRoomFormData({
+                    ...joinRoomFormData,
+                    userName: e.target.value,
+                  })
+                }
+              />
+            </Form.Group>
+            <Form.Group controlId="roomCode">
+              <Form.Label>Room Code</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter room code"
+                required
+                onChange={(e) =>
+                  setJoinRoomFormData({
+                    ...joinRoomFormData,
+                    userName: e.target.value,
+                  })
+                }
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleJoinRoomSubmit}>
             Submit
           </Button>
         </Modal.Footer>
