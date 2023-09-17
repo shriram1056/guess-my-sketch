@@ -1,0 +1,18 @@
+.welcome-page {
+  background-image: url('../assets/images/pexels-jot-singh-2179483.jpg'); /* Adjust the path to your image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh; /* Make sure the body covers the entire viewport height */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+}
+
+.modal-header {
+  border: none;
+}
+
+.modal-footer {
+  border: none;
+  justify-content: center;
+}
