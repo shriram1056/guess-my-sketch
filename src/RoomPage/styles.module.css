@@ -1,0 +1,67 @@
+.container {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  padding: 1px;
+  border: 1px solid #000000;
+}
+
+.toolBoxContainer {
+  height: 30px;
+  box-shadow: 0 -3px 4px #00000029;
+}
+
+.colors {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  height: 100%;
+}
+
+.color {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  outline: none;
+  border: 1px solid transparent;
+  border-left-color: #ffffff;
+  border-right-color: #ffffff;
+  cursor: pointer;
+}
+
+.color:first-of-type {
+  border-left-color: transparent;
+}
+
+.color:last-of-type {
+  border-right-color: transparent;
+}
+
+.color.active {
+  border: 3px solid #ffffff;
+  border-radius: 5px;
+}
+
+/* Add these CSS styles to your stylesheet */
+.eraserButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  border-width: 0 0 1px 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1; /* Make sure the icon is above the canvas */
+}
+
+/* Style the eraser icon itself (customize as needed) */
+.eraserIcon {
+  width: 20px;
+  height: 20px;
+  fill: #000000; /* Icon color */
+}
