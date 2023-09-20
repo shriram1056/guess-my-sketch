@@ -2,10 +2,8 @@ import React, { useRef, useState, useCallback, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import styles from './styles.module.css'
-
-// Import an eraser icon from a library or use an image
-import EraserIcon from '../assets/svg/eraser.svg' // Replace with your actual eraser icon source
-import { viewport } from '@popperjs/core'
+import EraserIcon from '../assets/svg/eraser.svg'
+import ClearIcon from '../assets/svg/clear-option-svgrepo-com.svg'
 
 function DrawingToolBox({ colors, active, onChange }) {
   const handleColorClick = (color) => {
@@ -120,12 +118,29 @@ function ReactCanvasPaint(props) {
     <div className={styles.container}>
       {/* Add a button or icon to toggle eraser */}
       {!props.viewOnly && (
-        <button
-          className={styles.eraserButton}
-          onClick={() => setActiveColor('#ffffff')}
-        >
-          <img src={EraserIcon} alt="Eraser" className={styles.eraserIcon} />
-        </button>
+        <>
+          <button
+            className={styles.eraserButton}
+            onClick={() => setActiveColor('#ffffff')}
+          >
+            <img src={EraserIcon} alt="Eraser" className={styles.icon} />
+          </button>
+
+          <button
+            className={styles.clearButton}
+            onClick={() => {
+              if (canvas.current) {
+                const context = canvas.current.getContext('2d')
+                context.clearRect(0, 0, props.width, props.height)
+                handleDraw(
+                  context.getImageData(0, 0, props.width, props.height)
+                )
+              }
+            }}
+          >
+            <img src={ClearIcon} alt="Clear" className={styles.icon} />
+          </button>
+        </>
       )}
       <canvas
         ref={canvas}

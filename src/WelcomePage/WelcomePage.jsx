@@ -93,6 +93,7 @@ export function WelcomePage() {
         show={showJoinRoomModal}
         onHide={handleJoinRoomCloseModal}
         backdrop="static"
+        className="d-flex flex-column justify-content-center modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>New a Room</Modal.Title>

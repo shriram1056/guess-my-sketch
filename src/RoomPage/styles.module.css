@@ -59,8 +59,25 @@
   z-index: 1; /* Make sure the icon is above the canvas */
 }
 
+/* Add these CSS styles to your stylesheet */
+.clearButton {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  border-width: 0 0 1px 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1; /* Make sure the icon is above the canvas */
+}
+
 /* Style the eraser icon itself (customize as needed) */
-.eraserIcon {
+.icon {
   width: 20px;
   height: 20px;
   fill: #000000; /* Icon color */
