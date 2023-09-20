@@ -2,9 +2,9 @@ import { Button, Modal, Form } from 'react-bootstrap'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import './WelcomePage.css'
+import './Welcome.css'
 
-export function WelcomePage() {
+export function Welcome() {
   const navigate = useNavigate()
   const [showNewRoomModal, setShowNewRoomModal] = useState(false)
   const [newRoomFormData, setNewRoomFormData] = useState({}) // State for form data
@@ -140,4 +140,4 @@ export function WelcomePage() {
   )
 }
 
-export default WelcomePage
+export default Welcome

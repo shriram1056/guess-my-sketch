@@ -1,9 +1,9 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import styles from './styles.module.css'
-import EraserIcon from '../assets/svg/eraser.svg'
-import ClearIcon from '../assets/svg/clear-option-svgrepo-com.svg'
+import styles from './style.module.css'
+import EraserIcon from '../../assets/svg/eraser.svg'
+import ClearIcon from '../../assets/svg/clear-option-svgrepo-com.svg'
 
 function DrawingToolBox({ colors, active, onChange }) {
   const handleColorClick = (color) => {

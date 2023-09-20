@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import ReactCanvasPaint from './ReactCanvasPaint'
-import './RoomPage.css'
+import ReactCanvasPaint from '../../components/canvas/ReactCanvasPaint'
+import './Room.css'
 
-export function RoomPage() {
+export function Room() {
   const [draw, setDraw] = useState(undefined)
   const [scoreboardData, setScoreboardData] = useState([
     { name: 'Player 1', score: 100 },
@@ -85,4 +85,4 @@ export function RoomPage() {
   )
 }
 
-export default RoomPage
+export default Room
