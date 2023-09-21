@@ -13,14 +13,7 @@ namespace GuessMySketch.Data
             Configuration = configuration;
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            // connect to postgres with connection string from app settings
-            options.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
-        }
-
-        public DbSet<Chat> Chats { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Room> Rooms { get; set; } 
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Room> Rooms { get; set; } = null!;
     }
 }

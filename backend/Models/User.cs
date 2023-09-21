@@ -12,16 +12,22 @@ namespace GuessMySketch.Models
         public Guid Id { get; set; }
 
         [Column("name")]
-        public string Name { get; set; }
-        
+        [Required]
+        public string Name { get; set; } = null!;
+
         [Column("score")]
-        public string Score { get; set; }
+        [Required]
+        public int Score { get; set; }
+
+        [Column("active")]
+        [Required]
+        public bool Active { get; set; }
+
 
         [Required]
         [ForeignKey("room_id")]
-        public Room Room { get; set; }
+        public Room? Room { get; set; }
 
-        public ICollection<Chat> Chats { get; set; }
     }
 }
 
