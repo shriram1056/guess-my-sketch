@@ -3,7 +3,9 @@ import ReactCanvasPaint from '../../components/canvas/ReactCanvasPaint'
 import './Room.css'
 
 export function Room() {
-  const [draw, setDraw] = useState(undefined)
+  const [originalPosition, setOriginalPosition] = useState(undefined)
+  const [newPosition, setNewPosition] = useState(undefined)
+  const [activeColor, setActiveColor] = useState(undefined)
   const [scoreboardData, setScoreboardData] = useState([
     { name: 'Player 1', score: 100 },
     { name: 'Player 2', score: 85 },
@@ -30,8 +32,6 @@ export function Room() {
     return colour
   }
 
-  console.log(getUsernameColor('User2'))
-
   return (
     <div className="container-fluid d-flex flex-column vh-100 p-2 roomPageContainer">
       <div className="row">
@@ -40,19 +40,21 @@ export function Room() {
             strokeWidth={15}
             width={800}
             height={400}
-            onDraw={setDraw}
+            setOriginalPosition={setOriginalPosition}
+            originalPosition={originalPosition}
+            setActiveColor={setActiveColor}
+            activeColor={activeColor}
+            setNewPosition={setNewPosition}
+            newPosition={newPosition}
           />
         </div>
         <div className="col d-flex flex-column chats bg-primary me-3 pb-3">
-          {' '}
           <h3 className="chat-title text-center m-3 text-white ">Chats</h3>
           <div className="chat-container mx-4 bg-white p-3 flex-basis-1">
-            {/* Sample chat messages */}
             <p className="mb-2" style={{ color: getUsernameColor('User 1') }}>
               User 1: Hello!
             </p>
             <p className="mb-2">User 2: Hi there!</p>
-            {/* Add more chat messages as needed */}
           </div>
         </div>
       </div>

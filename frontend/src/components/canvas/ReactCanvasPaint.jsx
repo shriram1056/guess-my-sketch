@@ -96,13 +96,10 @@ function ReactCanvasPaint(props) {
       context.closePath()
 
       context.stroke()
-      handleDraw(context.getImageData(0, 0, props.width, props.height))
-    }
-  }
 
-  const handleDraw = (data) => {
-    if (typeof props.onDraw === 'function') {
-      props.onDraw(data)
+      props.setActiveColor(activeColor)
+      props.setOriginalPosition(originalPosition)
+      props.setNewPosition(newPosition)
     }
   }
 
@@ -114,6 +111,18 @@ function ReactCanvasPaint(props) {
     }
   }, [props.data])
 
+  useEffect(() => {
+    if (
+      props.viewOnly &&
+      props.originalPosition &&
+      props.newPosition &&
+      props.activeColor
+    ) {
+      setActiveColor(props.activeColor)
+      drawLine(props.originalPosition, props.newPosition)
+    }
+  }, [props.originalPosition, props.newPosition])
+
   return (
     <div className={styles.container}>
       {/* Add a button or icon to toggle eraser */}
@@ -121,7 +130,10 @@ function ReactCanvasPaint(props) {
         <>
           <button
             className={styles.eraserButton}
-            onClick={() => setActiveColor('#ffffff')}
+            onClick={() => {
+              setActiveColor('#ffffff')
+              props.setActiveColor('#ffffff')
+            }}
           >
             <img src={EraserIcon} alt="Eraser" className={styles.icon} />
           </button>
@@ -132,9 +144,6 @@ function ReactCanvasPaint(props) {
               if (canvas.current) {
                 const context = canvas.current.getContext('2d')
                 context.clearRect(0, 0, props.width, props.height)
-                handleDraw(
-                  context.getImageData(0, 0, props.width, props.height)
-                )
               }
             }}
           >
@@ -145,12 +154,9 @@ function ReactCanvasPaint(props) {
       <canvas
         ref={canvas}
         onMouseDown={props.viewOnly ? undefined : onDown}
-        onTouchStart={props.viewOnly ? undefined : onDown}
         onMouseUp={props.viewOnly ? undefined : onUp}
-        onTouchEnd={props.viewOnly ? undefined : onUp}
         onMouseLeave={props.viewOnly ? undefined : onUp}
         onMouseMove={props.viewOnly ? undefined : onMove}
-        onTouchMove={props.viewOnly ? undefined : onMove}
         width={props.width}
         height={props.height}
       />
@@ -169,8 +175,12 @@ ReactCanvasPaint.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   viewOnly: PropTypes.bool,
-  data: PropTypes.object,
-  onDraw: PropTypes.func,
+  setOriginalPosition: PropTypes.func,
+  setNewPosition: PropTypes.func,
+  originalPosition: PropTypes.object,
+  newPosition: PropTypes.object,
+  setActiveColor: PropTypes.func,
+  activeColor: PropTypes.string,
   colors: PropTypes.arrayOf(PropTypes.string),
   strokeWidth: PropTypes.number,
 }
