@@ -8,24 +8,22 @@ namespace GuessMySketch.Models
     {
         [Key]
         [Column("code")]
+        [Required]
         public string Code { get; set; } = null!;
 
         [Column("word")]
-        public string Word { get; set; } = null!;
+        public string? Word { get; set; } = null!;
 
         [Column("current_drawer")]
-        public string CurrentDrawer { get; set; } = null!;
+        public string? CurrentDrawer { get; set; } = null!;
 
         [Column("host_id")]
-        public string HostId { get; set; } = null!;
+        public string? HostId { get; set; } = null!;
 
         [Column("game_started")]
         public bool GameStarted { get; set; }
 
-        [Column("user_count")]
-        public int UserCount { get; set; }
-
-        public ICollection<User> Users { get; set; } = new List<User>();
+        public ICollection<User>? Users { get; set; } = new List<User>();
 
     }
 }

@@ -1,5 +1,8 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace GuessMySketch.Models
 {
@@ -9,7 +12,7 @@ namespace GuessMySketch.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         [Column("id")]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Column("name")]
         [Required]
@@ -17,15 +20,18 @@ namespace GuessMySketch.Models
 
         [Column("score")]
         [Required]
-        public int Score { get; set; }
+        public int Score { get; set; } = 0;
 
-        [Column("active")]
+        [Column("creationTimeStamp")]
         [Required]
-        public bool Active { get; set; }
+        public DateTime CreationTimestamp { get; set; }
 
+        [Column("room_id")]
+        [ForeignKey("room")]
+        public string? RoomId { get; set; }
 
         [Required]
-        [ForeignKey("room_id")]
+        [JsonIgnore]
         public Room? Room { get; set; }
 
     }
