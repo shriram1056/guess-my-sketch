@@ -5,6 +5,7 @@ using GuessMySketch.Models;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,12 +15,20 @@ builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
         builder
         .AllowAnyMethod()
         .AllowAnyHeader()
+        .AllowCredentials()
         .WithOrigins("http://localhost:3000");
     }));
 
 builder.Services.AddScoped<IRoomRepo, RoomRepo>();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(opts => opts.KeepAliveInterval = TimeSpan.FromSeconds(15)).AddMessagePackProtocol()
+        .AddStackExchangeRedis(o =>
+        {
+            o.Configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("RedisConnectionString"));
+            o.Configuration.ChannelPrefix = "backend";
+            o.Configuration.AbortOnConnectFail = false;
+        });
+
 
 builder.Services.AddControllers();
 
@@ -43,9 +52,10 @@ app.UseCors("CorsPolicy");
 
 app.UseRouting();
 
+
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapHub<RoomHub>("/chatHub", options =>
+    endpoints.MapHub<RoomHub>("/room", options =>
     {
         options.Transports = HttpTransportType.WebSockets;
     });
@@ -54,27 +64,14 @@ app.UseEndpoints(endpoints =>
 app.MapPost("/createRoom", async (HttpContext context, IRoomRepo repo, [FromBody] CreateRoomDto createRoomDto) =>
 {
 
-    SessionReadDto session = await repo.CreateRoom(createRoomDto.name);
+    CookieReadDto session = await repo.CreateRoom(createRoomDto.name);
 
     if (session != null && session.Data != null)
     {
-        // Serialize the object to JSON
-
-        Console.WriteLine(session);
-
-        string room = JsonConvert.SerializeObject(session.Data.Room, Formatting.None,
-                        new JsonSerializerSettings()
-                        {
-                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                        });
-
         // Set the JSON string as a cookie value
-        context.Response.Cookies.Append("room", room);
+        context.Response.Cookies.Append("room", JsonConvert.SerializeObject(new { code = session.Data.Code, username = session.Data.Username, host = true }), new CookieOptions { Expires = DateTime.Now.AddHours(24), Secure = true, HttpOnly = true, SameSite = SameSiteMode.None });
 
-        context.Response.Cookies.Append("user_id", session.Data.UserId.ToString());
-        context.Response.Cookies.Append("name", session.Data.Name);
-
-        return Results.Created($"/users/{session.Data.Room.Code}", session);
+        return Results.Created($"/users/{session.Data.Code}", new { code = session.Data.Code, username = session.Data.Username });
     }
     else if (session != null && session.Message != null)
     {
@@ -87,27 +84,15 @@ app.MapPost("/createRoom", async (HttpContext context, IRoomRepo repo, [FromBody
 app.MapPost("/joinRoom", async (HttpContext context, IRoomRepo repo, [FromBody] JoinRoomDto joinRoomDto) =>
 {
 
-    SessionReadDto session = await repo.JoinRoom(joinRoomDto);
+    CookieReadDto session = await repo.JoinRoom(joinRoomDto);
 
     if (session != null && session.Data != null)
     {
-        // Serialize the object to JSON
-
-        Console.WriteLine(session);
-
-        string room = JsonConvert.SerializeObject(session.Data.Room, Formatting.None,
-                        new JsonSerializerSettings()
-                        {
-                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                        });
 
         // Set the JSON string as a cookie value
-        context.Response.Cookies.Append("room", room);
+        context.Response.Cookies.Append("room", JsonConvert.SerializeObject(new { code = session.Data.Code, username = session.Data.Username, host = false }), new CookieOptions { Expires = DateTime.Now.AddHours(24), Secure = true, HttpOnly = true, SameSite = SameSiteMode.None });
 
-        context.Response.Cookies.Append("user_id", session.Data.UserId.ToString());
-        context.Response.Cookies.Append("name", session.Data.Name);
-
-        return Results.Created($"/users/{session.Data.Room.Code}", session);
+        return Results.Created($"/users/{session.Data.Code}", new { code = session.Data.Code, username = session.Data.Username });
     }
     else if (session != null && session.Message != null)
     {
@@ -120,5 +105,4 @@ app.MapPost("/joinRoom", async (HttpContext context, IRoomRepo repo, [FromBody] 
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

@@ -5,7 +5,7 @@ namespace GuessMySketch.Data
 {
     public interface IRoomRepo
     {
-        Task<SessionReadDto>? CreateRoom(string name);
-        Task<SessionReadDto>? JoinRoom(JoinRoomDto joinRoomDto);
+        Task<CookieReadDto>? CreateRoom(string name);
+        Task<CookieReadDto>? JoinRoom(JoinRoomDto joinRoomDto);
     }
 }

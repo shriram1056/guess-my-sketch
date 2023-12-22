@@ -5,9 +5,10 @@ import styles from './style.module.css'
 import EraserIcon from '../../assets/svg/eraser.svg'
 import ClearIcon from '../../assets/svg/clear-option-svgrepo-com.svg'
 
-function DrawingToolBox({ colors, active, onChange }) {
+function DrawingToolBox({ colors, active, onChange, onPropChange }) {
   const handleColorClick = (color) => {
     onChange(color)
+    onPropChange(color)
   }
 
   return (
@@ -97,7 +98,6 @@ function ReactCanvasPaint(props) {
 
       context.stroke()
 
-      props.setActiveColor(activeColor)
       props.setOriginalPosition(originalPosition)
       props.setNewPosition(newPosition)
     }
@@ -112,16 +112,24 @@ function ReactCanvasPaint(props) {
   }, [props.data])
 
   useEffect(() => {
-    if (
-      props.viewOnly &&
-      props.originalPosition &&
-      props.newPosition &&
-      props.activeColor
-    ) {
-      setActiveColor(props.activeColor)
+    if (props.viewOnly) setActiveColor(props.activeColor)
+    console.log('colorchange')
+  }, [props.activeColor])
+
+  useEffect(() => {
+    console.log('reactioon')
+    if (props.viewOnly && props.originalPosition && props.newPosition) {
       drawLine(props.originalPosition, props.newPosition)
     }
   }, [props.originalPosition, props.newPosition])
+
+  useEffect(() => {
+    if (props.viewOnly && props.clearCanvas && canvas.current) {
+      const context = canvas.current.getContext('2d')
+      context.clearRect(0, 0, props.width, props.height)
+      props.setClearCanvas(false)
+    }
+  }, [props.clearCanvas])
 
   return (
     <div className={styles.container}>
@@ -144,6 +152,7 @@ function ReactCanvasPaint(props) {
               if (canvas.current) {
                 const context = canvas.current.getContext('2d')
                 context.clearRect(0, 0, props.width, props.height)
+                props.connection.invoke('ClearCanvas', props.room_id)
               }
             }}
           >
@@ -165,6 +174,7 @@ function ReactCanvasPaint(props) {
           colors={props.colors}
           active={activeColor}
           onChange={setActiveColor}
+          onPropChange={props.setActiveColor}
         />
       )}
     </div>
@@ -180,7 +190,11 @@ ReactCanvasPaint.propTypes = {
   originalPosition: PropTypes.object,
   newPosition: PropTypes.object,
   setActiveColor: PropTypes.func,
+  setClearCanvas: PropTypes.func,
+  clearCanvas: PropTypes.bool,
   activeColor: PropTypes.string,
+  room_id: PropTypes.string,
+  connection: PropTypes.object,
   colors: PropTypes.arrayOf(PropTypes.string),
   strokeWidth: PropTypes.number,
 }

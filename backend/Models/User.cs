@@ -12,19 +12,22 @@ namespace GuessMySketch.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         [Column("id")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Column("name")]
         [Required]
         public string Name { get; set; } = null!;
 
+        [Column("created_at")] // Specify the column name
+        [Required]
+        public DateTime CreatedAt { get; set; }
+
+        [Column("connection_id")]
+        public string? ConnectionId { get; set; } = null!;
+
         [Column("score")]
         [Required]
         public int Score { get; set; } = 0;
-
-        [Column("creationTimeStamp")]
-        [Required]
-        public DateTime CreationTimestamp { get; set; }
 
         [Column("room_id")]
         [ForeignKey("room")]

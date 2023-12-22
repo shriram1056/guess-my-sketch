@@ -14,7 +14,7 @@ namespace GuessMySketch.Data
             _context = context;
         }
 
-        public async Task<SessionReadDto>? CreateRoom(string name)
+        public async Task<CookieReadDto>? CreateRoom(string name)
         {
             string code = Util.RandomCode();
             var room = await _context.Rooms.FirstOrDefaultAsync(room => room.Code == code);
@@ -29,20 +29,22 @@ namespace GuessMySketch.Data
 
             try
             {
+
                 if (rowsAffected > 0)
                 {
                     // If rows were inserted successfully, you can retrieve the inserted record
                     Room? insertedRoom = await _context.Rooms.FirstOrDefaultAsync(room => room.Code == code);
-
                     if (insertedRoom != null)
                     {
+                        Console.WriteLine(insertedRoom);
                         await _context.Database.ExecuteSqlRawAsync("INSERT INTO public.user (name, room_id) VALUES ({0}, {1})", name, code);
 
                         User? insertedUser = await _context.Users.FirstOrDefaultAsync(user => user.Name == name && user.RoomId == code);
+                        await _context.Database.ExecuteSqlRawAsync("UPDATE public.room SET host = {0} WHERE code = {1}", insertedUser.Name, code);
 
                         if (insertedUser != null)
                         {
-                            return new SessionReadDto { Data = new SessionData { Room = insertedRoom, UserId = insertedUser.Id, Name = name } };
+                            return new CookieReadDto { Data = new CookieDto { Username = insertedUser.Name, Code = insertedRoom.Code } };
                         }
                     }
 
@@ -50,14 +52,15 @@ namespace GuessMySketch.Data
             }
             catch (Npgsql.PostgresException e)
             {
-                return new SessionReadDto { Message = e.SqlState };
+                Console.WriteLine(e);
+                return new CookieReadDto { Message = e.SqlState };
 
             }
 
             return null;
         }
 
-        public async Task<SessionReadDto>? JoinRoom(JoinRoomDto joinRoomDto)
+        public async Task<CookieReadDto>? JoinRoom(JoinRoomDto joinRoomDto)
         {
             var room = await _context.Rooms.Include(room => room.Users).FirstOrDefaultAsync(room => room.Code == joinRoomDto.code);
 
@@ -65,7 +68,7 @@ namespace GuessMySketch.Data
             {
                 if (room.GameStarted)
                 {
-                    return new SessionReadDto { Message = "the game has already started" };
+                    return new CookieReadDto { Message = "the game has already started" };
                 }
 
 
@@ -78,7 +81,7 @@ namespace GuessMySketch.Data
                     if (insertedUser != null)
                     {
                         room.Users.Add(insertedUser);
-                        return new SessionReadDto { Data = new SessionData { Room = room, UserId = insertedUser.Id, Name = joinRoomDto.name } };
+                        return new CookieReadDto { Data = new CookieDto { Username = insertedUser.Name, Code = room.Code } };
                     }
 
                 }
@@ -86,7 +89,7 @@ namespace GuessMySketch.Data
                 {
                     if (e.SqlState == "23505")
                     {
-                        return new SessionReadDto { Message = "the user name is taken" };
+                        return new CookieReadDto { Message = "the user name is taken" };
                     }
                 }
             }

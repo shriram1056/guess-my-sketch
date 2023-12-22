@@ -1,23 +1,123 @@
 import React, { useState, useEffect } from 'react'
 import ReactCanvasPaint from '../../components/canvas/ReactCanvasPaint'
+import {
+  HubConnectionBuilder,
+  LogLevel,
+  HttpTransportType,
+} from '@microsoft/signalr'
 import './Room.css'
+import { useParams } from 'react-router-dom'
 
 export function Room() {
   const [originalPosition, setOriginalPosition] = useState(undefined)
   const [newPosition, setNewPosition] = useState(undefined)
   const [activeColor, setActiveColor] = useState(undefined)
-  const [scoreboardData, setScoreboardData] = useState([
-    { name: 'Player 1', score: 100 },
-    { name: 'Player 2', score: 85 },
-    { name: 'Player 3', score: 70 },
-    // Add more objects as needed
-  ])
+  const [gameStarted, setGameStarted] = useState(false)
+  const [pause, setPause] = useState(false)
+  const [host, setHost] = useState(false)
+  const [currentDrawer, setCurrentDrawer] = useState(false)
+  const [clearCanvas, setClearCanvas] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [newMessage, setNewMessage] = useState('')
+  const [scoreboardData, setScoreboardData] = useState([])
+  const [connection, setConnection] = useState(null)
+  const [countdown, setCountdown] = useState(60)
+  const { room_id, username } = useParams()
 
   useEffect(() => {
-    // Sort the scoreboardData array based on score in descending order
-    const sortedData = [...scoreboardData].sort((a, b) => b.score - a.score)
-    setScoreboardData(sortedData)
+    const socketConnection = new HubConnectionBuilder()
+      .configureLogging(LogLevel.Debug)
+      .withUrl('http://localhost:5027/room', {
+        skipNegotiation: true,
+        transport: HttpTransportType.WebSockets,
+        withCredentials: true,
+      })
+      .build()
+    setConnection(socketConnection)
   }, [])
+
+  useEffect(() => {
+    if (connection) {
+      connection.on('host', () => {
+        setHost(true)
+      })
+      connection.on('GameStarted', () => {
+        setPause(false)
+        setGameStarted(true)
+      })
+      connection.on('ResetTimer', () => {
+        setPause(false)
+        setCountdown(60)
+      })
+      connection.on('ReceiveCanvasData', (data) => {
+        setOriginalPosition(data.originalPosition)
+        setNewPosition(data.newPosition)
+      })
+      connection.on('ReceiveActiveColor', (activeColor) => {
+        setActiveColor(activeColor)
+      })
+      connection.on('CurrentDrawer', (name) => {
+        setCurrentDrawer(true)
+        let word = prompt('what will you be drawing?')
+        connection.invoke('NewWord', word)
+      })
+      connection.on('EndGame', (name) => {
+        alert(`the winner of the game is ${name}`)
+      })
+      connection.on('GetInfo', (data) => {
+        setPause(true)
+        setCurrentDrawer(false)
+        setScoreboardData(data)
+      })
+      connection.on('ClearCanvas', () => {
+        setClearCanvas(true)
+      })
+      connection.on('error', (message) => {
+        alert(message)
+      })
+      connection.start().then(function () {
+        console.log('connected')
+      })
+    }
+  }, [connection])
+
+  useEffect(() => {
+    if (connection) {
+      connection.on('ReceiveMessage', (data) => {
+        setMessages(messages.concat(data))
+      })
+    }
+  }, [connection, messages])
+  const handleSendMessage = () => {
+    connection.invoke('SendMessage', newMessage, countdown, false)
+    setNewMessage('')
+  }
+
+  useEffect(() => {
+    if (connection && currentDrawer) {
+      connection.invoke(
+        'SendCanvasData',
+        originalPosition,
+        newPosition,
+        room_id
+      )
+    }
+  }, [originalPosition, newPosition, currentDrawer])
+
+  useEffect(() => {
+    if (connection) {
+      connection.invoke('SendActiveColor', activeColor, room_id)
+    }
+  }, [activeColor])
+
+  React.useEffect(() => {
+    if (gameStarted && !pause) {
+      countdown > 0 && setTimeout(() => setCountdown(countdown - 1), 1000)
+      if (countdown == 0 && currentDrawer) {
+        connection.invoke('NextRound', username)
+      }
+    }
+  }, [countdown, gameStarted])
 
   const getUsernameColor = (str) => {
     let hash = 0
@@ -34,28 +134,79 @@ export function Room() {
 
   return (
     <div className="container-fluid d-flex flex-column vh-100 p-2 roomPageContainer">
+      <div className="row d-flex justify-content-between align-items-center">
+        {host && !gameStarted && (
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              let word = prompt('what will you be drawing?')
+              setCurrentDrawer(true)
+              connection.invoke('NewWord', word)
+              connection.invoke('GameStarted')
+            }}
+          >
+            Start Game
+          </button>
+        )}
+        <div>
+          <p>
+            {countdown < 10 ? '0' : ''}
+            {countdown} seconds left
+          </p>
+        </div>
+      </div>
       <div className="row">
         <div className="canvas col-auto ms-3 p-0">
           <ReactCanvasPaint
             strokeWidth={15}
-            width={800}
-            height={400}
+            viewOnly={!currentDrawer}
+            width={700}
+            height={300}
             setOriginalPosition={setOriginalPosition}
             originalPosition={originalPosition}
             setActiveColor={setActiveColor}
             activeColor={activeColor}
             setNewPosition={setNewPosition}
             newPosition={newPosition}
+            clearCanvas={clearCanvas}
+            setClearCanvas={setClearCanvas}
+            connection={connection}
+            room_id={room_id}
           />
         </div>
         <div className="col d-flex flex-column chats bg-primary me-3 pb-3">
           <h3 className="chat-title text-center m-3 text-white ">Chats</h3>
           <div className="chat-container mx-4 bg-white p-3 flex-basis-1">
-            <p className="mb-2" style={{ color: getUsernameColor('User 1') }}>
-              User 1: Hello!
-            </p>
-            <p className="mb-2">User 2: Hi there!</p>
+            {messages.map((message, index) => {
+              const userColorStyle = { color: getUsernameColor(message.name) }
+              if (message.special) {
+                return (
+                  <p key={index} className="mb-2" style={userColorStyle}>
+                    {message.name + ' ' + message.message}
+                  </p>
+                )
+              } else {
+                return (
+                  <p key={index} className="mb-2">
+                    <span style={userColorStyle}>{message.name}</span>
+                    {' ' + message.message}
+                  </p>
+                )
+              }
+            })}
           </div>
+          {gameStarted && (
+            <div class="mx-4 d-flex">
+              <input
+                type="text"
+                class="flex-grow-1"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message..."
+              />
+              <button onClick={handleSendMessage}>Send</button>
+            </div>
+          )}
         </div>
       </div>
       <div className="row flex-grow-1 scoreboard">

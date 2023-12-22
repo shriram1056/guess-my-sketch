@@ -14,11 +14,11 @@ namespace GuessMySketch.Models
         [Column("word")]
         public string? Word { get; set; } = null!;
 
+        [Column("host")]
+        public string? Host { get; set; } = null!;
+
         [Column("current_drawer")]
         public string? CurrentDrawer { get; set; } = null!;
-
-        [Column("host_id")]
-        public string? HostId { get; set; } = null!;
 
         [Column("game_started")]
         public bool GameStarted { get; set; }

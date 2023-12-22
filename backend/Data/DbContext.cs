@@ -22,13 +22,19 @@ namespace GuessMySketch.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("uuid-ossp");
             modelBuilder.Entity<User>()
-                .Property(e => e.CreationTimestamp)
-                .HasDefaultValueSql("NOW()");
+                     .Property(e => e.Id)
+                     .HasColumnType("uuid")
+                    .HasDefaultValueSql("uuid_generate_v4()")    // Use 
+                     .IsRequired();
 
             modelBuilder.Entity<User>()
                 .Property(e => e.Score)
                 .HasDefaultValue(0);
+
+            modelBuilder.Entity<User>()
+           .Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             modelBuilder.Entity<Room>()
            .Property(e => e.GameStarted)
@@ -40,8 +46,6 @@ namespace GuessMySketch.Data
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Room> Rooms { get; set; } = null!;
-
-
 
     }
 }

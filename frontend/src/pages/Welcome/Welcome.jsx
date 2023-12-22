@@ -2,6 +2,7 @@ import { Button, Modal, Form } from 'react-bootstrap'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import axios from 'axios'
 import './Welcome.css'
 
 export function Welcome() {
@@ -28,13 +29,35 @@ export function Welcome() {
   }
 
   const handleNewRoomSubmit = () => {
-    console.log(newRoomFormData)
+    const config = {
+      withCredentials: true,
+    }
+
+    axios
+      .post('http://localhost:5027/createRoom', newRoomFormData, config)
+      .then(function (response) {
+        navigate(`/room/${response.data.code}/${response.data.username}`)
+      })
+      .catch(function (error) {
+        console.error('Error:', error)
+      })
+
     handleNewRoomCloseModal()
   }
 
   const handleJoinRoomSubmit = () => {
-    console.log(joinRoomFormData)
-    navigate('/room')
+    const config = {
+      withCredentials: true,
+    }
+
+    axios
+      .post('http://localhost:5027/joinRoom', joinRoomFormData, config)
+      .then(function (response) {
+        navigate(`/room/${response.data.code}/${response.data.username}`)
+      })
+      .catch(function (error) {
+        console.error('Error:', error)
+      })
     handleJoinRoomCloseModal()
   }
 
@@ -75,7 +98,7 @@ export function Welcome() {
                 onChange={(e) =>
                   setNewRoomFormData({
                     ...newRoomFormData,
-                    userName: e.target.value,
+                    name: e.target.value,
                   })
                 }
               />
@@ -109,7 +132,7 @@ export function Welcome() {
                 onChange={(e) =>
                   setJoinRoomFormData({
                     ...joinRoomFormData,
-                    userName: e.target.value,
+                    name: e.target.value,
                   })
                 }
               />
@@ -123,7 +146,7 @@ export function Welcome() {
                 onChange={(e) =>
                   setJoinRoomFormData({
                     ...joinRoomFormData,
-                    userName: e.target.value,
+                    code: e.target.value,
                   })
                 }
               />
