@@ -39,6 +39,7 @@ public class RoomHub : Hub
                 name = data.Name
             });
             await GetInfo(data.RoomId);
+            await ClearCanvas(data.RoomId);
             await NextRound(data.Room.CurrentDrawer);
         }
         else
@@ -63,7 +64,7 @@ public class RoomHub : Hub
 
     public async Task ClearCanvas(string roomId)
     {
-        await Clients.OthersInGroup(roomId).SendAsync("ClearCanvas");
+        await Clients.Group(roomId).SendAsync("ClearCanvas");
     }
 
     public async Task NextRound(string username)
@@ -78,7 +79,6 @@ public class RoomHub : Hub
 
         if (user == null)
         {
-            Console.WriteLine("dsd");
             await EndGame(data.RoomId);
         }
         else
